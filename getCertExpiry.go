@@ -41,7 +41,7 @@ func parseArgs(args []string) (string, error) {
 	return args[1], nil
 }
 
-//Exits with status 0 if cert valid and supported, 1 if expired, 3 if not supported, 4 if untrusted, and 5 if the args are incorrectly formatted
+//Exits with status 0 if cert valid and supported, 1 if expired, 3 if not supported, 4 if untrusted (TODO), and 5 if the args are incorrectly formatted
 func main() {
 	args, err := parseArgs(os.Args)
 	if err != nil {
