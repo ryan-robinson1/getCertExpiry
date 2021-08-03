@@ -10,12 +10,12 @@ getCertExpiry is a go command line tool to find the expiration dates of given se
 ## Usage
 
 
- <font size="3">Toggles on the deployments that contain the specified labels or names by setting their scales to 1</font> <pre>$ ./getCertExpiry <span style="color:magenta"><i><b>ADDRESS</b></i></span>:<span style="color:magenta"><i><b>PORT</b></i></span> </pre>
+ <font size="3">TODO: Description of command</font> <pre>$ ./getCertExpiry <span style="color:magenta"><i><b>ADDRESS</b></i></span>:<span style="color:magenta"><i><b>PORT</b></i></span> </pre>
 
 
 
 ## Example
-    $ ./kubeToggler example.com:5000
+    $ ./getCertExpiry example.com:5000
 
 
  
