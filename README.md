@@ -4,7 +4,7 @@ getCertExpiry is a go command line tool to find the expiration dates of given se
 ## Getting Started
 
 ### Installation
-* ``git clone https://github.com/ryan-robinson1/kubeToggler.git ``
+* ``git clone https://github.com/ryan-robinson1/getCertExpiry.git ``
 ### Setup
 * cd into the getCertExpiry directory and build the binary with ``go build``
 ## Usage
