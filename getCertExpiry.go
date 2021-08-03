@@ -31,7 +31,6 @@ func getCertExpiry(address string) (int, string, error) {
 		return 1, expiry.Format("2006-01-02 15:04:05"), nil
 	}
 	return 0, expiry.Format("2006-01-02 15:04:05"), nil
-
 }
 
 func parseArgs(args []string) (string, error) {
@@ -48,6 +47,7 @@ func main() {
 		fmt.Println(err)
 		os.Exit(5)
 	}
+
 	status, expiry, err := getCertExpiry(args)
 	if err != nil {
 		fmt.Printf("Server doesn't support SSL certificate err: " + err.Error())
