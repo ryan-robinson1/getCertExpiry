@@ -50,10 +50,10 @@ func getCertExpiry(address string, skipVerify bool) (int, string, error) {
 		InsecureSkipVerify: skipVerify,
 	}
 	conn, err := tls.Dial("tcp", address, conf)
+	fmt.Println(conn.ConnectionState().PeerCertificates[0].NotAfter)
 	if err != nil {
 		return 3, "", err
 	}
-	fmt.Println(conn.ConnectionState().PeerCertificates[0].Subject.CommonName)
 	expiry := conn.ConnectionState().PeerCertificates[0].NotAfter
 	if isTimePast(expiry) {
 		return 1, expiry.Format("2006-01-02 15:04:05"), nil
