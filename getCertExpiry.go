@@ -32,7 +32,7 @@ func getCertExpiry(address string, skipVerify bool, certflag bool, certs []strin
 		InsecureSkipVerify: skipVerify,
 	}
 	if certflag {
-		cert, err := tls.LoadX509KeyPair(certs[2], certs[3])
+		cert, err := tls.LoadX509KeyPair(certs[3], certs[2])
 		if err != nil {
 			log.Fatal(err)
 		}
