@@ -71,8 +71,8 @@ func parseArgs(args []string) (string, bool, *tls.Certificate, error) {
 	subAdr := flag.NewFlagSet("adr", flag.ExitOnError)
 
 	secureFlag := subAdr.Bool("insecure", false, "Allow insecure tls connections")
-	certFile := subAdr.String("cert", "", "A PEM eoncoded certificate file.")
-	keyFile := subAdr.String("key", "", "A PEM encoded private key file.")
+	certFile := subAdr.String("cert", "ryan.crt", "A PEM eoncoded certificate file.")
+	keyFile := subAdr.String("key", "ryan.key", "A PEM encoded private key file.")
 
 	cert, err := tls.LoadX509KeyPair(*certFile, *keyFile)
 	if err != nil {
