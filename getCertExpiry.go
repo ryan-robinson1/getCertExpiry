@@ -11,7 +11,6 @@ package main
 import (
 	"crypto/tls"
 	"crypto/x509"
-	"encoding/pem"
 	"errors"
 	"flag"
 	"fmt"
@@ -21,24 +20,6 @@ import (
 	"time"
 )
 
-func openCert(filename string) (*x509.Certificate, error) {
-	d, err := ioutil.ReadFile(filename)
-	if err != nil {
-		return nil, err
-	}
-
-	block, _ := pem.Decode([]byte(d))
-	if block == nil {
-		return nil, err
-	}
-	cert, err := x509.ParseCertificate(block.Bytes)
-	if err != nil {
-		return nil, err
-	}
-
-	return cert, nil
-}
-
 //Takes a time and returns true if the time has past, false otherwise
 func isTimePast(t time.Time) bool {
 	delta := time.Since(t)
@@ -46,24 +27,36 @@ func isTimePast(t time.Time) bool {
 }
 
 //Connects to address and returns 0 if the cert is valid and 1 if it is expired in addition to the cert expiration date. If the server does not support SSL certificates, return 3 and an error.
-func getCertExpiry(address string, skipVerify bool) (int, string, error) {
-	cert, err := tls.LoadX509KeyPair("ryan.crt", "ryan.key")
-	if err != nil {
-		log.Fatal(err)
-	}
-	caCert, err := ioutil.ReadFile("ca.crt")
-	if err != nil {
-		log.Fatal(err)
-	}
-	caCertPool := x509.NewCertPool()
-	caCertPool.AppendCertsFromPEM(caCert)
-
+func getCertExpiry(address string, skipVerify bool, certflag bool, certs []string) (int, string, error) {
 	conf := &tls.Config{
-		Certificates:       []tls.Certificate{cert},
-		RootCAs:            caCertPool,
 		InsecureSkipVerify: skipVerify,
 	}
-	conf.BuildNameToCertificate()
+	if certflag {
+		cert, err := tls.LoadX509KeyPair(certs[0], certs[1])
+		if err != nil {
+			log.Fatal(err)
+		}
+		caCert, err := ioutil.ReadFile(certs[1])
+		if err != nil {
+			log.Fatal(err)
+		}
+		users, err := ioutil.ReadFile(certs[2])
+		if err != nil {
+			log.Fatal(err)
+		}
+		caCertPool := x509.NewCertPool()
+		caCertPool.AppendCertsFromPEM(caCert)
+		caCertPool.AppendCertsFromPEM(users)
+
+		conf = &tls.Config{
+			Certificates:       []tls.Certificate{cert},
+			RootCAs:            caCertPool,
+			ClientCAs:          caCertPool,
+			InsecureSkipVerify: skipVerify,
+		}
+
+	}
+
 	conn, err := tls.Dial("tcp", address, conf)
 	if err != nil {
 		return 3, "", err
@@ -77,27 +70,40 @@ func getCertExpiry(address string, skipVerify bool) (int, string, error) {
 }
 
 //Parses the first argument for the address and then looks for flags. Currently the only flag is the "insecure" flag which allows for insecure tls connections
-func parseArgs(args []string) (string, bool, error) {
+func parseArgs(args []string) (string, bool, bool, []string, error) {
 	if len(args) < 2 {
-		return "", false, errors.New("args error: no args, refer to README for arg format")
+		return "", false, false, nil, errors.New("args error: no args, refer to README for arg format")
 	}
 
 	subAdr := flag.NewFlagSet("adr", flag.ExitOnError)
 	secureFlag := subAdr.Bool("insecure", false, "Allow insecure tls connections")
+	certFlag := subAdr.Bool("certs", false, "Connection requires certs")
+
 	subAdr.Parse(os.Args[2:])
 
-	return args[1], *secureFlag, nil
+	//if cert flag, set the last 4 args to be certs and return an array of those certs
+	if *certFlag {
+		if len(os.Args) == 7 || *secureFlag && len(os.Args) == 8 {
+			var certs []string
+			for i := 1; i <= 4; i++ {
+				certs = append(certs, os.Args[len(os.Args)-i])
+			}
+			return args[1], *secureFlag, *certFlag, certs, nil
+		}
+		return "", false, false, nil, errors.New("args error: cert args incorrect, refer to README for arg format")
+	}
+	return args[1], *secureFlag, *certFlag, nil, nil
 }
 
 //Exits with status 0 if cert valid and supported, 1 if expired, 3 if not supported, 4 if untrusted (TODO), and 5 if there are no args
 func main() {
-	args, secure, err := parseArgs(os.Args)
+	args, secure, certFlag, certs, err := parseArgs(os.Args)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(5)
 	}
 
-	status, expiry, err := getCertExpiry(args, secure)
+	status, expiry, err := getCertExpiry(args, secure, certFlag, certs)
 
 	if err != nil {
 		if err.Error() == "x509: certificate signed by unknown authority" && !secure {
