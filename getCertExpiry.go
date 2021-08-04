@@ -10,12 +10,33 @@ package main
 
 import (
 	"crypto/tls"
+	"crypto/x509"
+	"encoding/pem"
 	"errors"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"time"
 )
+
+func openCert(filename string) (*x509.Certificate, error) {
+	d, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return nil, err
+	}
+
+	block, _ := pem.Decode([]byte(d))
+	if block == nil {
+		return nil, err
+	}
+	cert, err := x509.ParseCertificate(block.Bytes)
+	if err != nil {
+		return nil, err
+	}
+
+	return cert, nil
+}
 
 //Takes a time and returns true if the time has past, false otherwise
 func isTimePast(t time.Time) bool {
@@ -32,6 +53,7 @@ func getCertExpiry(address string, skipVerify bool) (int, string, error) {
 	if err != nil {
 		return 3, "", err
 	}
+	fmt.Println(conn.ConnectionState().PeerCertificates[0].Subject.CommonName)
 	expiry := conn.ConnectionState().PeerCertificates[0].NotAfter
 	if isTimePast(expiry) {
 		return 1, expiry.Format("2006-01-02 15:04:05"), nil
