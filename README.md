@@ -10,7 +10,7 @@ getCertExpiry is a go command line tool to find the expiration dates of given se
 ## Usage
 
 
- <font size="3">Gets the expiration date of the specified server cert. Use the ``--insecure`` flag to allow insecure TLS connections</font> <pre>$ ./getCertExpiry <span style="color:magenta"><i><b>ADDRESS</b></i></span>:<span style="color:magenta"><i><b>PORT</b></i></span> [--insecure] </pre>
+ <font size="3">Gets the expiration date of the specified server cert. Use the ``--insecure`` flag to allow insecure TLS connections. Use the ``--certs`` flag and cert arguments to load in client certs</font> <pre>$ ./getCertExpiry <span style="color:magenta"><i><b>ADDRESS</b></i></span>:<span style="color:magenta"><i><b>PORT</b></i></span> [--insecure] [--certs][<span style="color:magenta"><i><b>CLIENT_CRT CLIENT_KEY USERS_CRT ROOTCA_CRT</b></i></span>]</pre>
 ## Exit Codes
 * _Exit Code 0 : Cert is valid_
 * _Exit Code 1 : Cert is expired_
@@ -21,6 +21,7 @@ getCertExpiry is a go command line tool to find the expiration dates of given se
 ## Example
     $ ./getCertExpiry example.com:5000
     $ ./getCertExpiry example.com:5000 --insecure
+    $ ./getCertExpiry example.com:5000 --insecure --certs client.crt client.key users.crt rootca.crt
 
 
  

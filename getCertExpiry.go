@@ -32,7 +32,7 @@ func getCertExpiry(address string, skipVerify bool, certflag bool, certs []strin
 		InsecureSkipVerify: skipVerify,
 	}
 	if certflag {
-		cert, err := tls.LoadX509KeyPair(certs[0], certs[1])
+		cert, err := tls.LoadX509KeyPair(certs[2], certs[3])
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -40,7 +40,7 @@ func getCertExpiry(address string, skipVerify bool, certflag bool, certs []strin
 		if err != nil {
 			log.Fatal(err)
 		}
-		users, err := ioutil.ReadFile(certs[2])
+		users, err := ioutil.ReadFile(certs[0])
 		if err != nil {
 			log.Fatal(err)
 		}
