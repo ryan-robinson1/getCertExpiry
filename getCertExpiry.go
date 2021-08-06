@@ -63,7 +63,6 @@ func getCertExpiry(address string, cert string, key string, ca string, insecure 
 
 //Parses the first argument for the address and then looks for flags. Currently the only flag is the "insecure" flag which allows for insecure tls connections
 func parseArgs(args []string) (string, string, string, string, bool, error) {
-
 	urlFlag := flag.String("u", "", "url in the format 'url:port'")
 	certFlag := flag.String("c", "", "Client cert file")
 	keyFlag := flag.String("k", "", "Client key file")
@@ -71,6 +70,9 @@ func parseArgs(args []string) (string, string, string, string, bool, error) {
 	insecureFlag := flag.Bool("i", false, "allows untrusted cert connections")
 
 	flag.Parse()
+	if *urlFlag == "" {
+		return flag.Arg(0), *certFlag, *keyFlag, *caFlag, *insecureFlag, nil
+	}
 	if len(args) == 1 {
 		return "", "", "", "", false, errors.New("err: no args, use --help for args")
 	}
