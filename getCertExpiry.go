@@ -3,7 +3,6 @@
 
 	getCertExpiry is a go command line tool to find the expiration dates of given server certs and check if they are expired
 
-	TODO: Fix error message when mixed flag arguments are entered
 */
 
 package main
