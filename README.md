@@ -2,8 +2,6 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/mjwaxios/getCertExpiry)](https://goreportcard.com/report/github.com/mjwaxios/getCertExpiry)
 [![License](https://img.shields.io/badge/LICENSE-Apache2.0-ff69b4.svg)](http://www.apache.org/licenses/LICENSE-2.0.html)
 
-[![Build Status](https://travis-ci.org/mjwaxios/getCertExpiry.svg?branch=master)](https://travis-ci.org/mjwaxios/getCertExpiry)
-
 
 # getCertExpiry
 ## Overview
