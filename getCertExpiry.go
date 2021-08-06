@@ -11,11 +11,9 @@ package main
 import (
 	"crypto/tls"
 	"crypto/x509"
-	"errors"
 	"flag"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"time"
 )
@@ -27,36 +25,29 @@ func isTimePast(t time.Time) bool {
 }
 
 //Connects to address and returns 0 if the cert is valid and 1 if it is expired in addition to the cert expiration date. If the server does not support SSL certificates, return 3 and an error.
-func getCertExpiry(address string, skipVerify bool, certflag bool, certs []string) (int, string, error) {
-	conf := &tls.Config{
-		InsecureSkipVerify: skipVerify,
+func getCertExpiry(address string, cert string, key string, ca string, insecure bool) (int, string, error) {
+	caCertPool := x509.NewCertPool()
+	tlsCert := tls.Certificate{}
+
+	if cert != "" && key != "" {
+		tempCert, err := tls.LoadX509KeyPair(cert, key)
+		if err != nil {
+			return 5, "", err
+		}
+		tlsCert = tempCert
 	}
-	if certflag {
-		cert, err := tls.LoadX509KeyPair(certs[3], certs[2])
+	if ca != "" {
+		caCert, err := ioutil.ReadFile(ca)
 		if err != nil {
-			log.Fatal(err)
+			return 5, "", err
 		}
-		caCert, err := ioutil.ReadFile(certs[1])
-		if err != nil {
-			log.Fatal(err)
-		}
-		users, err := ioutil.ReadFile(certs[0])
-		if err != nil {
-			log.Fatal(err)
-		}
-		caCertPool := x509.NewCertPool()
 		caCertPool.AppendCertsFromPEM(caCert)
-		caCertPool.AppendCertsFromPEM(users)
-
-		conf = &tls.Config{
-			Certificates:       []tls.Certificate{cert},
-			RootCAs:            caCertPool,
-			ClientCAs:          caCertPool,
-			InsecureSkipVerify: skipVerify,
-		}
-
 	}
-
+	conf := &tls.Config{
+		Certificates:       []tls.Certificate{tlsCert},
+		RootCAs:            caCertPool,
+		InsecureSkipVerify: insecure,
+	}
 	conn, err := tls.Dial("tcp", address, conf)
 	if err != nil {
 		return 3, "", err
@@ -70,47 +61,35 @@ func getCertExpiry(address string, skipVerify bool, certflag bool, certs []strin
 }
 
 //Parses the first argument for the address and then looks for flags. Currently the only flag is the "insecure" flag which allows for insecure tls connections
-func parseArgs(args []string) (string, bool, bool, []string, error) {
-	if len(args) < 2 {
-		return "", false, false, nil, errors.New("args error: no args, refer to README for arg format")
-	}
+func parseArgs(args []string) (string, string, string, string, bool, error) {
 
-	subAdr := flag.NewFlagSet("adr", flag.ExitOnError)
-	secureFlag := subAdr.Bool("insecure", false, "Allow insecure tls connections")
-	certFlag := subAdr.Bool("certs", false, "Connection requires certs")
+	urlFlag := flag.String("u", "", "url in the format 'url:port'")
+	certFlag := flag.String("c", "", "Client cert file")
+	keyFlag := flag.String("k", "", "Client key file")
+	caFlag := flag.String("a", "", "CA cert file")
+	insecureFlag := flag.Bool("i", false, "allows untrusted cert connections")
 
-	subAdr.Parse(os.Args[2:])
+	flag.Parse()
 
-	//if cert flag, set the last 4 args to be certs and return an array of those certs
-	if *certFlag {
-		if len(os.Args) == 7 || *secureFlag && len(os.Args) == 8 {
-			var certs []string
-			for i := 1; i <= 4; i++ {
-				certs = append(certs, os.Args[len(os.Args)-i])
-			}
-			return args[1], *secureFlag, *certFlag, certs, nil
-		}
-		return "", false, false, nil, errors.New("args error: cert args incorrect, refer to README for arg format")
-	}
-	return args[1], *secureFlag, *certFlag, nil, nil
+	return *urlFlag, *certFlag, *keyFlag, *caFlag, *insecureFlag, nil
 }
 
-//Exits with status 0 if cert valid and supported, 1 if expired, 3 if not supported, 4 if untrusted (TODO), and 5 if there are no args
+//Exits with status 0 if cert valid and supported, 1 if expired, 3 if not supported, 4 if untrusted, and 5 if the inputted certs are invalid
 func main() {
-	args, secure, certFlag, certs, err := parseArgs(os.Args)
+	url, cert, key, ca, insecure, err := parseArgs(os.Args)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(5)
 	}
 
-	status, expiry, err := getCertExpiry(args, secure, certFlag, certs)
+	status, expiry, err := getCertExpiry(url, cert, key, ca, insecure)
 
 	if err != nil {
-		if err.Error() == "x509: certificate signed by unknown authority" && !secure {
+		if err.Error() == "x509: certificate signed by unknown authority" {
 			fmt.Println(err.Error())
 			os.Exit(4)
 		}
-		fmt.Printf("Server doesn't support SSL certificate err: " + err.Error())
+		fmt.Printf("err: " + err.Error())
 	}
 	fmt.Println(expiry)
 	os.Exit(status)
