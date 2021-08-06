@@ -10,6 +10,7 @@ package main
 import (
 	"crypto/tls"
 	"crypto/x509"
+	"errors"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -23,7 +24,8 @@ func isTimePast(t time.Time) bool {
 	return delta > 0
 }
 
-//Connects to address and returns 0 if the cert is valid and 1 if it is expired in addition to the cert expiration date. If the server does not support SSL certificates, return 3 and an error.
+//Connects to address and returns 0 if the cert is valid and 1 if it is expired in addition to the cert expiration date. If the
+//server does not support SSL certificates, return 3 and an error. If the inputted client certs are invalid, return 5 and error
 func getCertExpiry(address string, cert string, key string, ca string, insecure bool) (int, string, error) {
 	caCertPool := x509.NewCertPool()
 	tlsCert := tls.Certificate{}
@@ -69,16 +71,18 @@ func parseArgs(args []string) (string, string, string, string, bool, error) {
 	insecureFlag := flag.Bool("i", false, "allows untrusted cert connections")
 
 	flag.Parse()
-
+	if len(args) == 1 {
+		return "", "", "", "", false, errors.New("err: no args, use --help for args")
+	}
 	return *urlFlag, *certFlag, *keyFlag, *caFlag, *insecureFlag, nil
 }
 
-//Exits with status 0 if cert valid and supported, 1 if expired, 3 if not supported, 4 if untrusted, and 5 if the inputted certs are invalid
+//Exits with status 0 if cert valid and supported, 1 if expired, 3 if not supported, 4 if untrusted, 5 if the inputted certs are invalid, and 6 for no inputted args
 func main() {
 	url, cert, key, ca, insecure, err := parseArgs(os.Args)
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(5)
+		fmt.Println(err.Error())
+		os.Exit(6)
 	}
 
 	status, expiry, err := getCertExpiry(url, cert, key, ca, insecure)
