@@ -1,5 +1,5 @@
-[![GoDoc](https://godoc.org/github.com/mjwaxios/getCertExpiry?status.svg)](https://godoc.org/github.com/mjwaxios/getCertExpiry)
-[![Go Report Card](https://goreportcard.com/badge/github.com/mjwaxios/getCertExpiry)](https://goreportcard.com/report/github.com/mjwaxios/getCertExpiry)
+[![GoDoc](https://godoc.org/github.com/ryan-robinson1/getCertExpiry?status.svg)](https://godoc.org/github.com/ryan-robinson1/getCertExpiry)
+[![Go Report Card](https://goreportcard.com/badge/github.com/ryan-robinson1/getCertExpiry)](https://goreportcard.com/report/github.com/ryan-robinson1/getCertExpiry)
 [![License](https://img.shields.io/badge/LICENSE-Apache2.0-ff69b4.svg)](http://www.apache.org/licenses/LICENSE-2.0.html)
 
 
