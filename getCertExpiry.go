@@ -26,7 +26,7 @@ func isTimePast(t time.Time) bool {
 
 //Connects to address and returns 0 if the cert is valid and 1 if it is expired in addition to the cert expiration date. If the
 //server does not support SSL certificates, return 3 and an error. If the inputted client certs are invalid, return 5 and error
-func getCertExpiry(address string, cert string, key string, ca string, insecure bool) (int, string, error) {
+func GetCertExpiry(address string, cert string, key string, ca string, insecure bool) (int, string, error) {
 	caCertPool := x509.NewCertPool()
 	tlsCert := tls.Certificate{}
 
@@ -62,7 +62,7 @@ func getCertExpiry(address string, cert string, key string, ca string, insecure 
 }
 
 //Parses the first argument for the address and then looks for flags. Currently the only flag is the "insecure" flag which allows for insecure tls connections
-func parseArgs(args []string) (string, string, string, string, bool, error) {
+func ParseArgs(args []string) (string, string, string, string, bool, error) {
 	urlFlag := flag.String("u", "", "url in the format 'url:port.' Specify without flag by inputting as last arg")
 	certFlag := flag.String("c", "", "Client cert file")
 	keyFlag := flag.String("k", "", "Client key file")
@@ -81,13 +81,13 @@ func parseArgs(args []string) (string, string, string, string, bool, error) {
 
 //Exits with status 0 if cert valid and supported, 1 if expired, 3 if not supported, 4 if untrusted, 5 if the inputted certs are invalid, and 6 for no inputted args
 func main() {
-	url, cert, key, ca, insecure, err := parseArgs(os.Args)
+	url, cert, key, ca, insecure, err := ParseArgs(os.Args)
 	if err != nil {
 		fmt.Println(err.Error())
 		os.Exit(6)
 	}
 
-	status, expiry, err := getCertExpiry(url, cert, key, ca, insecure)
+	status, expiry, err := GetCertExpiry(url, cert, key, ca, insecure)
 
 	if err != nil {
 		if err.Error() == "x509: certificate signed by unknown authority" {
