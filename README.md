@@ -1,3 +1,8 @@
+[![GoDoc](https://godoc.org/github.com/ryan-robinson1/getCertExpiry?status.svg)](https://godoc.org/github.com/ryan-robinson1/getCertExpiry)
+[![Go Report Card](https://goreportcard.com/badge/github.com/ryan-robinson1/getCertExpiry)](https://goreportcard.com/report/github.com/ryan-robinson1/getCertExpiry)
+[![License](https://img.shields.io/badge/LICENSE-Apache2.0-ff69b4.svg)](http://www.apache.org/licenses/LICENSE-2.0.html)
+
+
 # getCertExpiry
 ## Overview
 getCertExpiry is a go command line tool that can find the expiration dates of server certs and check if they are expired
